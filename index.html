@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Mac で動くローカル AI 導入手順書｜シクメイク</title>
+<meta name="description" content="個人情報を外に出さずに AI を使うための、Mac の中だけで動くローカル AI（LM Studio）の導入手順書">
+<link rel="icon" href="icon.png">
+<style>
+  :root {
+    --bg: #FFF9F5;
+    --surface: #FFFFFF;
+    --text: #18213B;
+    --sub: #5B6275;
+    --line: #EBE3DC;
+    --accent: #FF7A4D;
+    --accent-soft: #FFE9DF;
+    --navy: #18213B;
+    --code-bg: #18213B;
+    --code-text: #FFFFFF;
+    --warn-bg: #FFF4E5;
+    --warn-line: #F5C27A;
+    --ok: #2EA043;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11182B;
+      --surface: #18213B;
+      --text: #F3F1EC;
+      --sub: #A9AFBF;
+      --line: #2A3452;
+      --accent-soft: #3A2B2A;
+      --code-bg: #0B1020;
+      --warn-bg: #2E2718;
+      --warn-line: #7A5A26;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 0 16px 64px; }
+  header { background: var(--navy); color: #fff; padding: 28px 0 32px; }
+  header .wrap { padding-bottom: 0; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 14px; opacity: .9; }
+  .brand img { width: 32px; height: 32px; border-radius: 50%; }
+  h1 { font-size: 26px; line-height: 1.4; margin: 16px 0 8px; letter-spacing: .02em; }
+  .lead { margin: 0; color: #D8DCE6; font-size: 15px; }
+  .badge { display: inline-block; margin-top: 14px; padding: 2px 10px; border-radius: 999px; background: rgba(255,255,255,.12); font-size: 12px; }
+  h2 { font-size: 20px; margin: 44px 0 12px; padding-left: 12px; border-left: 4px solid var(--accent); line-height: 1.4; }
+  h3 { font-size: 17px; margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin: 14px 0; }
+  .features { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
+  .features li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .features b { display: block; }
+  .features span { color: var(--sub); font-size: 14px; }
+  .checklist { list-style: none; padding: 0; margin: 8px 0; }
+  .checklist li { padding: 6px 0 6px 30px; position: relative; border-bottom: 1px dashed var(--line); }
+  .checklist li:last-child { border-bottom: 0; }
+  .checklist li::before { content: ""; position: absolute; left: 2px; top: 12px; width: 16px; height: 16px; border: 2px solid var(--accent); border-radius: 4px; }
+  .step { display: flex; align-items: center; gap: 10px; margin: 44px 0 6px; }
+  .step .num { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+  .step h2 { margin: 0; padding: 0; border: 0; }
+  .where { color: var(--sub); font-size: 14px; margin: 0 0 8px 44px; }
+  ol.do { padding-left: 1.4em; margin: 8px 0; }
+  ol.do li { margin: 6px 0; }
+  .cmd { position: relative; margin: 12px 0; }
+  .cmd pre { margin: 0; background: var(--code-bg); color: var(--code-text); border-radius: 12px; padding: 14px 16px 52px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; word-break: break-all; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .cmd button { position: absolute; right: 10px; bottom: 10px; background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .cmd button.done { background: var(--ok); }
+  code { background: var(--accent-soft); padding: 1px 6px; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; }
+  .note { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 12px; padding: 12px 14px; margin: 14px 0; font-size: 15px; }
+  .note b { display: block; margin-bottom: 2px; }
+  .tip { background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; margin: 14px 0; font-size: 15px; }
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin: 10px 0; padding: 0 14px; }
+  summary { cursor: pointer; padding: 12px 0; font-weight: 700; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "＋"; color: var(--accent); margin-right: 8px; }
+  details[open] summary::before { content: "－"; }
+  details > div { padding-bottom: 12px; }
+  a { color: var(--accent); }
+  .shot { margin: 14px 0 18px; }
+  .shot img, .shot video { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); }
+  .shot figcaption { color: var(--sub); font-size: 13px; text-align: center; margin-top: 6px; }
+  /* 画像を撮ったら <div class="todo"> を <img> に差し替える */
+  .todo { border: 2px dashed var(--line); border-radius: 14px; padding: 28px 16px; text-align: center; color: var(--sub); font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+  th { color: var(--sub); font-weight: 700; font-size: 13px; }
+  .table-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 4px 12px; overflow-x: auto; }
+  .next { background: var(--navy); color: #fff; border-radius: 16px; padding: 20px 20px 22px; margin: 44px 0 14px; }
+  .next h2 { border: 0; padding: 0; margin: 0 0 8px; color: #fff; }
+  .next p { color: #D8DCE6; }
+  .next ul { margin: 8px 0 14px; padding-left: 1.2em; color: #fff; }
+  .next a.btn { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; font-weight: 700; padding: 10px 18px; border-radius: 10px; }
+  footer { color: var(--sub); font-size: 13px; margin-top: 56px; border-top: 1px solid var(--line); padding-top: 18px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand"><img src="icon.png" alt="">シクメイク｜AIで仕組みを作る</div>
+    <h1>Mac の中だけで動く AI<br>導入手順書</h1>
+    <p class="lead">個人情報が入った文章でも、外に出さずに AI に任せられるようにします。ターミナル（黒い画面）は使いません。</p>
+    <span class="badge">LINE 友だち限定ページ</span>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <h2>入力した文章は、どこへ行く？</h2>
+  <figure class="shot">
+    <video src="img/how-it-works.mp4" poster="img/compare.png" autoplay muted loop playsinline aria-label="クラウドAIでは文章が外部のサーバーへ送られ、ローカルAIでは Mac の中だけで処理される様子を比べたアニメーション"></video>
+    <figcaption>左：ネット経由で使うクラウド AI ／ 右：この手順書で入れるローカル AI</figcaption>
+  </figure>
+  <p>ChatGPT や Claude は、AI の本体が外部のサーバーにあるため、入力した文章は必ずそこへ送られます。ローカル AI は、<b>AI の本体（モデル）を自分の Mac にダウンロードして</b>使うので、文章を送る相手がそもそもいません。Wi-Fi を切っても動きます。</p>
+
+  <h2>できること・苦手なこと</h2>
+  <ul class="features">
+    <li><b>できること</b><span>メールの返信の下書き、メモ・議事録の整理、文章の要約・校正、悩みの壁打ち。数秒〜10 秒ほどで、自然な日本語が返ってきます</span></li>
+    <li><b>苦手なこと</b><span>最新の ChatGPT・Claude より、はっきり 1〜2 段落ちる賢さです。計算や事実をそれらしく間違えることがあります</span></li>
+  </ul>
+  <p>おすすめは、<b>個人情報が入るものはローカル AI、それ以外は ChatGPT・Claude</b> という使い分けです。</p>
+
+  <h2>用意するもの</h2>
+  <div class="card">
+    <ul class="checklist">
+      <li>Apple シリコン（M1〜M5）の Mac（<b>Intel の Mac は使えません</b>）</li>
+      <li>macOS 14（Sonoma）以上</li>
+      <li>メモリ 16GB 以上がおすすめ（8GB でも小さいモデルなら動きます）</li>
+      <li>ストレージの空き 15GB ほど</li>
+    </ul>
+  </div>
+  <p>所要時間は 30 分ほどです（ほとんどはダウンロードの待ち時間です）。</p>
+
+  <!-- STEP 1 -->
+  <div class="step"><span class="num">1</span><h2>Mac で使えるか確かめる</h2></div>
+  <p class="where">Mac で</p>
+  <ol class="do">
+    <li>画面左上の  →「<b>この Mac について</b>」を開きます（「システム設定」→「一般」→「情報」でも同じものが見られます）。</li>
+    <li><b>チップ</b>が「Apple M〇」、<b>macOS</b> が 14 以上なら OK です。<b>メモリ</b>の量を覚えておきます（STEP 2 で使います）。</li>
+    <li> →「システム設定」→「一般」→「<b>ストレージ</b>」で、空きが 15GB 以上あるか確かめます。</li>
+  </ol>
+  <figure class="shot"><img src="img/about-mac.png" alt="Mac の情報画面。チップ Apple M4 Pro、メモリ 24GB、macOS のバージョンを囲んでいる" loading="lazy"><figcaption>チップ・メモリ・macOS を確かめる（例：Apple M4 Pro・24GB）</figcaption></figure>
+
+  <!-- STEP 2 -->
+  <div class="step"><span class="num">2</span><h2>メモリに合うモデルを選ぶ</h2></div>
+  <p class="where">下の表で</p>
+  <p>ローカル AI は、<b>モデル全体が Mac のメモリに入らないと動きません</b>。メモリの量で、使えるモデルが決まります。</p>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Mac のメモリ</th><th>大きさ</th><th>モデルの例</th><th>使用感</th></tr>
+      <tr><td>8GB</td><td>3〜4B</td><td>Qwen3.5 4B など</td><td>短い文章の整理なら使える</td></tr>
+      <tr><td>16〜24GB</td><td>8〜9B</td><td><b>Qwen3.5 9B</b></td><td>メール・要約・整理なら十分。メモリは約 6GB 使う</td></tr>
+      <tr><td>32GB 以上</td><td>27〜35B</td><td>Qwen3.6 27B、Gemma 4 31B など</td><td>かなり自然。そのぶん遅い</td></tr>
+    </table>
+  </div>
+  <ul style="padding-left:1.2em;margin:8px 0">
+    <li>「B」はモデルの大きさの単位です。数字が大きいほど賢く、重くなります。</li>
+    <li>日本語なら <b>Qwen（クウェン）系</b>がおすすめです。</li>
+    <li>迷ったら<b>小さいほう</b>から試してください。大きすぎると Mac 全体が重くなります。</li>
+    <li>表のモデル名は 2026 年 11 月時点の例です。新しいモデルは次々に出ます。</li>
+  </ul>
+  <div class="tip">作者の Mac（M4 Pro・メモリ 24GB）では、Qwen3.5 9B（4bit・MLX 版、約 6GB）で動作を確かめています。ほかのアプリを開いたままでも引っかかりなく動きます。</div>
+
+  <!-- STEP 3 -->
+  <div class="step"><span class="num">3</span><h2>LM Studio を入れる</h2></div>
+  <p class="where">Mac で</p>
+  <p>モデルを動かすアプリとして、無料の <b>LM Studio</b> を使います。ChatGPT のような画面で使えます。</p>
+  <ol class="do">
+    <li>公式のダウンロードページ <a href="https://lmstudio.ai/download">lmstudio.ai/download</a> を開きます。</li>
+    <li>下のほうの「<b>Download LM Studio for macOS</b>」を押します（約 570MB）。<b>上にある「Download Bionic for macOS」は別のアプリなので押さないでください。</b></li>
+    <li>ダウンロードしたファイルを開き、LM Studio を「アプリケーション」フォルダにドラッグします。</li>
+    <li>LM Studio を起動します。</li>
+  </ol>
+  <figure class="shot"><img src="img/download.png" alt="LM Studio のダウンロードページ。上の Bionic ではなく、下の Download LM Studio for macOS を押す" loading="lazy"><figcaption>上の「Bionic」ではなく、下の「LM Studio」を押す</figcaption></figure>
+  <div class="tip"><b>画面の言語について</b>左下の歯車（App Settings）→「General」→「<b>App Language</b>」で表示の言語を変えられます。ただし日本語表示は「開発中」とされているため、この手順書は英語表示のまま説明します。</div>
+  <figure class="shot"><img src="img/settings-language.png" alt="LM Studio の設定画面。General の中に App Language の項目がある" loading="lazy"><figcaption>設定の「App Language」（左下の歯車から開く）</figcaption></figure>
+
+  <!-- STEP 4 -->
+  <div class="step"><span class="num">4</span><h2>モデルをダウンロードする</h2></div>
+  <p class="where">LM Studio で</p>
+  <ol class="do">
+    <li>左のメニューの「<b>Model Search</b>」（虫めがねのアイコン）を開きます。</li>
+    <li>検索欄にモデル名（例：<code>Qwen3.5 9B</code>）を入れます。</li>
+    <li>いちばん上に出る、<b>名前の横に ✓ が付いた公式のもの</b>を選びます。Mac に合った形式（MLX）を自動で選んでくれます。</li>
+    <li>右側の「Download Options」で大きさ（Qwen3.5 9B なら約 6GB）を確かめて、「<b>Download</b>」を押します。回線によっては数十分かかります。</li>
+  </ol>
+  <figure class="shot"><img src="img/model-search.png" alt="Model Search で Qwen3.5 9B を検索した画面。上の公式の項目と、右のダウンロード欄を囲んでいる" loading="lazy"><figcaption>✓ の付いた公式の項目を選び、右の「Download」を押す（画面はダウンロード済みの状態）</figcaption></figure>
+  <p style="color:var(--sub);font-size:14px">一覧には「MLX-4bit」「MLX-8bit」などの版も並んでいます。4bit・8bit は「軽量化の度合い」で、4bit なら性能をあまり落とさずにメモリの使用量をおよそ半分にできます。迷ったら、上の公式のものを選べば大丈夫です。</p>
+
+  <!-- STEP 5 -->
+  <div class="step"><span class="num">5</span><h2>読み込んで会話する</h2></div>
+  <p class="where">LM Studio で</p>
+  <ol class="do">
+    <li>左のメニューの「<b>Chat</b>」を開き、「New chat」を押します。</li>
+    <li>入力欄の左下にある「<b>Pick a model</b>」を押して、ダウンロードしたモデルを選びます。</li>
+    <li>確認の画面が出たら「<b>Load Model</b>」を押します。読み込みに 15 秒ほどかかります。</li>
+    <li>入力欄に文章を入れて、右下の矢印ボタンで送ります。</li>
+  </ol>
+  <figure class="shot"><img src="img/model-picker.png" alt="入力欄の左下の Pick a model を押すと、ダウンロードしたモデルの一覧が出る" loading="lazy"><figcaption>入力欄の左下「Pick a model」→ モデルを選ぶ</figcaption></figure>
+  <figure class="shot"><img src="img/chat.png" alt="ローカル AI に架空の顧客メモの整理を頼み、名前・連絡先・要望・次にやることに整理された答えが返ってきた画面" loading="lazy"><figcaption>架空のメモを整理してもらった例（数秒で返ってきました）</figcaption></figure>
+
+  <h3>【重要】「考える」機能をオフにする</h3>
+  <p>新しいモデルは、答える前に「考える過程」を書き出す機能を持っています。オンのままだと、簡単な質問でも数十秒考え込みます。作者の環境では、長い指示で <b>5 分近く考え続けたうえに、答えが出ないまま止まりました</b>。</p>
+  <p>入力欄の下、モデル名の右にある「<b>Think</b>」ボタンを押して、<b>灰色（オフ）</b>にしてください。青いときがオンです。オフにすると、<b>2〜10 秒ほど</b>で答えるようになります。</p>
+  <figure class="shot"><img src="img/think-off.png" alt="Think ボタンのオンとオフの比較。青がオン、灰色がオフ" loading="lazy"><figcaption>上：オン（青）／下：オフ（灰色）。オフがおすすめ</figcaption></figure>
+
+  <h3>まず 1 つ試してみる</h3>
+  <p>架空のメモで、整理を頼んでみましょう。そのままコピーして貼り付けてください。</p>
+  <div class="cmd">
+    <pre id="try">次のメモを、下の形に整理してください。書かれていないことは「不明」としてください。推測で埋めないでください。
+
+・名前：
+・連絡先：
+・要望：
+・次にやること：
+
+---
+11/2 電話 田村さん（田村美咲） 080-9876-5432 ネイルサロン開業予定、インスタ用の画像を月8枚くらい作ってほしい、予算は相談 来週見積もり送る</pre>
+    <button type="button" data-copy="try">コピー</button>
+  </div>
+  <p style="color:var(--sub);font-size:14px">※ 名前・電話番号は架空です。</p>
+
+  <!-- STEP 6 -->
+  <div class="step"><span class="num">6</span><h2>外に出ていないか、自分で確かめる</h2></div>
+  <p class="where">Mac で</p>
+  <p>LM Studio の公式ドキュメント（アプリ内の「Offline Operation」）にも、<b>モデルとの会話で入力した内容は端末の外に出ない</b>と書かれています。そのうえで、自分の目で確かめておきましょう。</p>
+
+  <h3>方法 1：Wi-Fi を切って使ってみる（いちばん確実）</h3>
+  <p>画面右上の Wi-Fi をオフにして、LM Studio で会話してみてください。<b>ネットがなくても返事が返ってくれば、計算は Mac の中だけで行われています</b>。個人情報を扱うときは、最初から Wi-Fi を切って使うのがいちばん安心です。</p>
+  <figure class="shot"><img src="img/wifi-off.png" alt="右上の Wi-Fi アイコンがオフの状態で、ローカル AI に架空のメール作成を頼み、返事が返ってきた画面" loading="lazy"><figcaption>Wi-Fi をオフにしたまま、数秒で返事が返ってきた（作者の Mac で撮影）</figcaption></figure>
+
+  <div class="note"><b>アクティビティモニタでは確かめられません</b>Mac の「アクティビティモニタ」の通信量で確かめる方法もよく紹介されます。ですが作者が試したところ、LM Studio がモデルを検索して<b>明らかに通信しているときも「0 バイト」と表示されました</b>。LM Studio の通信は正しく数えられないようなので、この方法は使わないでください。</div>
+  <div class="tip"><b>作者が確かめたこと</b>LM Studio に関係するすべてのプロセスの接続先を記録しながら試しました。モデルを検索したときは外部への接続が記録されましたが、<b>会話したときは外部への接続が 1 件もありませんでした</b>。</div>
+
+  <h3>方法 2：ネットを使う場面を知っておく</h3>
+  <p>LM Studio がネットを使うのは、主に次のときだけです（公式ドキュメントより）。</p>
+  <ul style="padding-left:1.2em;margin:8px 0">
+    <li>Model Search でモデルを探す・ダウンロードするとき</li>
+    <li>動作用の部品（ランタイム）を更新するとき</li>
+    <li>起動時に、アプリの新しい版がないか確認するとき</li>
+  </ul>
+  <p><b>会話の中身を送る場面ではありません。</b>ダウンロードが終わったら、Wi-Fi を切って使う流れにすると安心です。アプリを更新したときは、念のため方法 1 でもう一度確かめてください。</p>
+
+  <h2>あわせて知っておきたいこと</h2>
+
+  <h3>会話の履歴は Mac の中に残る</h3>
+  <p>会話は外に出ませんが、<b>Mac の中には保存されます</b>。保存場所は <code>~/.lmstudio/conversations/</code> です。Mac を家族と共用している場合などは、個人情報を扱った会話を使い終わったら消しておきましょう。</p>
+  <ul style="padding-left:1.2em;margin:8px 0">
+    <li><b>アプリの中で消す</b>：左の会話の一覧で、会話の右の「<b>…</b>」→「<b>Delete</b>」</li>
+    <li><b>まとめて消す</b>：Finder で <code>⌘ command</code> ＋ <code>shift</code> ＋ <code>G</code> を押し、上の場所を入れて開く → 中のファイルを削除して、ゴミ箱を空にする</li>
+  </ul>
+  <figure class="shot"><img src="img/chat-delete.png" alt="左の会話一覧で、会話の右の … を押すとメニューが出て、いちばん下に Delete がある" loading="lazy"><figcaption>会話の右の「…」→「Delete」</figcaption></figure>
+  <p style="color:var(--sub);font-size:14px">Time Machine でバックアップを取っている場合は、バックアップにも残ります。</p>
+
+  <h3>Mac そのものの守りも忘れずに</h3>
+  <p>ローカル AI が守れるのは「<b>ネットの向こうに文章を渡さない</b>」ところまでです。Mac 自体が盗まれたり、ウイルスに感染したりすれば、中の情報は危険にさらされます。</p>
+  <div class="card">
+    <ul class="checklist">
+      <li>Mac にログインパスワードを設定する</li>
+      <li>FileVault（ディスクの暗号化）をオンにする：「システム設定」→「プライバシーとセキュリティ」→「FileVault」</li>
+      <li>macOS を最新に保ち、出どころの分からないアプリを入れない</li>
+    </ul>
+  </div>
+
+  <h2>困ったとき</h2>
+  <details>
+    <summary>答えが返ってこない・ずっと考えている</summary>
+    <div>STEP 5 の「考える（Thinking）」をオフにしてください。いちばん多いつまずきです。</div>
+  </details>
+  <details>
+    <summary>動きがとても遅い・Mac が固まる</summary>
+    <div>モデルがメモリに対して大きすぎます。STEP 2 の表で 1 段小さいモデルに変えてください。ほかのアプリ（特にブラウザのタブ）を閉じるのも効果があります。</div>
+  </details>
+  <details>
+    <summary>日本語が不自然・途中で英語になる</summary>
+    <div>Qwen 系など、日本語に強いモデルに変えてください。指示の最初に「日本語で答えてください」と書くのも効果があります。</div>
+  </details>
+  <details>
+    <summary>ダウンロードが途中で止まる・容量が足りない</summary>
+    <div>ストレージの空きを確かめてください。使わなくなったモデルは、LM Studio の左のメニューの「Library」から削除できます。</div>
+  </details>
+  <details>
+    <summary>LM Studio が開けない・インストールできない</summary>
+    <div>Intel の Mac と、macOS 13 以前には対応していません。「用意するもの」をもう一度確かめてください。</div>
+  </details>
+
+  <!-- 有料 note の案内（公開後に URL を入れる） -->
+  <section class="next">
+    <h2>次のステップ：仕事で安全に使いこなす</h2>
+    <p>入れただけでは、ローカル AI はまだ半分です。小さい AI は「察する力」が弱く、頼み方しだいで結果が大きく変わります。作者が実際に試して、失敗したところを直した使い方を note にまとめました。</p>
+    <ul>
+      <li>コピペで使える指示 9 本（メール返信・顧客メモ・議事録・契約書の下読み ほか）</li>
+      <li>個人情報を伏せ字にしてから ChatGPT・Claude に渡し、答えを元に戻す方法</li>
+      <li>実際に試したら、最初は伏せ字が漏れた。その実例と対策</li>
+    </ul>
+    <a class="btn" href="https://note.com/shikumake">note で読む（500 円）</a>
+  </section>
+
+  <footer>
+    <p>作成：シクメイク（<a href="https://x.com/shiku_make">X</a> ／ <a href="https://note.com/shikumake">note</a>）</p>
+    <p>この手順書の内容は 2026 年 11 月時点（LM Studio 0.4.28）で確かめたものです。LM Studio は Element Labs 社のアプリで、シクメイクとは関係ありません。</p>
+  </footer>
+</main>
+
+<script>
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = document.getElementById(btn.dataset.copy).textContent;
+      var done = function () {
+        btn.textContent = "コピーしました";
+        btn.classList.add("done");
+        setTimeout(function () { btn.textContent = "コピー"; btn.classList.remove("done"); }, 1800);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); });
+      } else { fallback(text); done(); }
+    });
+  });
+  function fallback(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+</script>
+</body>
+</html>
